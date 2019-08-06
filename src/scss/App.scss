@@ -1,0 +1,160 @@
+// Colour variables:
+// primary
+$light-blue : #3394db;
+$dark-blue : #005a8f;
+// secondary
+$orange : #dc8f20;
+$light-gray : #888888;
+$dark-gray : #333333;
+
+.shadow {
+  background-color: #000;
+  height: 100vh;
+  width: 100vw;
+  position: fixed;
+  top: 0;
+  left: 0;
+}
+
+#root .App{
+    width:100%;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    background-color: blue;
+
+    .player {
+	background-color: $dark-gray;
+	// min-width: 250px;
+	// min-height: 250px;
+	position: relative;
+	width: 90% ;
+	max-width : calc((90vh - 3rem)*16/9);
+	padding: 0.2rem;
+	.screen {
+	    background-color: yellow;// $dark-gray;
+	    margin-bottom: 0.2rem;
+	    //width: calc(100% - 0.4rem);
+	    padding-top : calc(100% * 9/16);
+	    position: relative;
+	    
+	    .projector {
+		width: 100%;
+		height: 100%;
+		position: absolute;
+		top: 0;
+		left: 0;
+
+		.hide, .hide * {
+		    display: none;
+		}
+		.loading {
+		    position: absolute;
+		    top: 0;
+		    left: 0;
+		    width: 100%;
+		    height: 100%;
+		    background-color: $dark-gray;
+		    z-index: 10;
+		    display: flex;
+		    flex-direction: column;
+		    justify-content: center;
+		    align-items: center;
+		    svg {
+			font-size: 3rem;
+		    }
+		}
+
+		
+		.pic {
+		    width: 100%;
+		    height: 100%;
+		    position: absolute;
+		    top: 0;
+		    left: 0;
+		    display: none;
+		}
+		.static_shown, .shown { display: block}
+	    }
+	}
+	
+	.controller {
+	    margin: 0.1rem 0;
+	    position: relative;
+	    background-color: red;//$dark-gray;
+	    display: flex;
+	    justify-content: center;
+	    align-items: center;
+	    font-size: 1rem;
+	    & > *:first-child {
+		margin-right: auto;
+		margin-left: 0.2rem
+	    }
+	    & > *:last-child {
+		margin-left: auto;
+		margin-right: 0.2rem
+	    }
+
+	    .left {
+		margin-left: 0.2rem;
+		padding-right: 0.2rem;
+	    }
+	    .right {
+		margin-right: 0.2rem;
+		padding-left: 0.2rem;
+	    }
+	    .play {
+		padding-left: 0.2rem;
+		padding-top: 0.2 rem;
+	    }
+
+	    .secondary {
+		color: white;
+		background-color: transparent;
+		border: 2px solid white;
+	    }
+
+	    #slide_counter {
+		border: none;
+		padding: 0.2rem;
+	    }
+	    
+	    button{
+		--size: 2.5em;
+		padding: 0;
+		position: relative;
+		border: none;
+		margin: 0.2rem 0.1rem;
+		border-radius: 100rem;
+		height: var(--size);
+		width: var(--size);
+		background-color: white;
+		color: $light-blue;
+		font-size: inherit;
+		cursor: pointer;
+
+		&:disabled {
+		    opacity: 0.5;
+		    cursor: not-allowed;
+		}
+
+		.blue {
+		    color: $light-blue;
+		}
+	    }
+	    // magic numbers:
+	    //// width : 5*2.5rem + margin < 13
+	    //// height: 13*9/16 + 3
+	    @media (max-width: 16.5rem) ,( max-height: 13rem) {
+		font-size: 0.6rem;
+		button {
+		    margin: 0.2rem 0.1rem;
+		   
+		}
+		.play { padding: 0 }
+	    }
+	}
+    }
+}

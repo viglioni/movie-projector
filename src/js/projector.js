@@ -1,10 +1,11 @@
 import React, {useCallback,useRef,useState, useEffect} from 'react';
 import {FontAwesomeIcon as FA} from "@fortawesome/react-fontawesome";
 
-const Projector = ({movies, suffix=".svg", paused, fps=7}) =>{
+const Projector = ({movies, paused, movie_id, prev_movie_id=0, nextMovie, type}) =>{
     /*
      * STATES
      */
+    const [times_played, setTimesPlayed] = useState(0);
     const [loading, setLoading] = useState(true);
     const [percentage, setPercentage] = useState(0);
     const [frames_loaded, setFramesLoaded] = useState(
@@ -17,46 +18,54 @@ const Projector = ({movies, suffix=".svg", paused, fps=7}) =>{
             logo:!mov.logo,
         }))  
     );
-    
-    /*
-     * SVG Layers
-     */
-    //const [background, setBackground] = useState([]);
-//    const [frames, setFrames] = useState([]);
-    const [foreground, setForeground] = useState([]);
-    const [logo, setLogo] = useState([]);
 
     /*
      * NON-STATES
-     * consts state/prop dependents or refs 
-     */ 
+     * consts state/prop dependents 
+     */
+    const movie = movies[movie_id];
+    const fps = movie.fps || 13;
+    const suffix = movie.suffix || ".svg";
     const time_per_frame = 1000/fps;
+    const times_to_play = movie.times || 1;
+    /*
+     * REFS 
+     */
     const last_update = useRef(null);
     const anim_id = useRef(null);
     const frames_ref = useRef([]);
     const static_ref = useRef([]);
+    const frame_id = useRef(0);
+    
     /*
      * Methods and Callbacks
      */
-
-    const showFrame = useCallback((mov, frame) => {
+    const showFrame = useCallback(() => {
         if(!loading){
-            frames_ref.current[mov][frame].classList.add('shown');
-            Object.values(static_ref.current[mov]).forEach(img => img.classList.add("shown"));
+            frames_ref.current[movie_id][frame_id.current].classList.add('shown');
+            Object.values(static_ref.current[movie_id]).forEach(img => img.classList.add("static_shown"));
         }
-    }, [loading]);
+    }, [movie_id, loading]);
 
-    useEffect( ()=> {
-        if(!loading) showFrame(0,0);
-    }, [showFrame, loading]);
+    const hideFrame = useCallback( () => {
+        frames_ref.current[movie_id][frame_id.current].classList.remove('shown');
+    },[movie_id]);
 
-    const updateFrame = useCallback(
-        ()=> { console.log( "trocou frame!"); }
-        ,[]);
+    useEffect( ()=> console.log('paused: ', paused), [paused]);
+    
+    const updateFrame = useCallback( ()=> {
+        
+        hideFrame();
+        frame_id.current = (frame_id.current + 1)%movie.number_frames;
+        
+        if(frame_id.current === 0){ setTimesPlayed ( times => times + 1); }
+        showFrame();
+        //        console.log("Frame is: ", frame_id.current, " from movie ", movie_id);
+        
+    },[movie, hideFrame, showFrame]);
     
     const step = useCallback (
-        (start_time, last_animation_request) =>{
-           
+        (start_time, last_animation_request) =>{          
             if(!loading){
                 let checkpoint = last_update.current || start_time;
                 let delta = start_time - checkpoint;
@@ -123,6 +132,14 @@ const Projector = ({movies, suffix=".svg", paused, fps=7}) =>{
      * Effects
      */
 
+    useEffect( ()=>{
+        console.log(movie_id, prev_movie_id);
+    }, [movie_id, prev_movie_id]);
+
+    useEffect( ()=> { // show first frame
+        if(!loading) showFrame();
+    }, [showFrame, loading]);
+
     useEffect( ()=>{ // SET IF PAGE IS LOADING
         setLoading( 
             !(  frames_loaded.map( x => x.reduce( (acc,val) => acc && val, true))
@@ -156,34 +173,6 @@ const Projector = ({movies, suffix=".svg", paused, fps=7}) =>{
         );
     },[movies]);
 
-    
-    useEffect( ()=> { // SET LAYERS
-        // setBackground(
-        //     movies.map( (mov, idx) => createImg('background',idx,mov))
-        // );
-        // setForeground(
-            
-        // );
-        // setLogo(
-            
-        // );
-
-        // setFrames(
-        //     movies.map( (mov,idx) => 
-        //                 Array(mov.number_frames).fill()
-        //                 .map( (_,i) =>
-        //                       <img
-        //                         key={i}
-        //                         src={mov.frames + '/' + i + suffix}
-        //                         className='pic'
-        //                         id={`frame_${mov.frames}_${i}`}
-        //                         onLoad={()=> handleLoad(idx,i)}
-        //                         alt={`Frame número ${i+1} do filme ${idx+1}`}
-        //                       />)
-        //               )
-        // );
-    }, [movies, suffix, createImg, handleLoad]);
-
     useEffect( ()=>{
         const animation = window.requestAnimationFrame( step );
         return () => window.cancelAnimationFrame(animation);
@@ -201,8 +190,7 @@ const Projector = ({movies, suffix=".svg", paused, fps=7}) =>{
             <p> {percentage} %</p>
           </div>
           {movies.map( (mov, idx) => createImg('background',idx,mov))}
-          {
-              movies.map( (mov,idx) =>
+          {movies.map( (mov,idx) =>
                           Array(mov.number_frames).fill()
                           .map( (_,i) =>
                                 <img
@@ -218,8 +206,7 @@ const Projector = ({movies, suffix=".svg", paused, fps=7}) =>{
                                       frames_ref.current[idx][i] = el;
                                   }}
                                 />)
-                        )
-          }
+                        )}
           {movies.map( (mov, idx) => createImg('foreground',idx,mov))}
           {movies.map( (mov, idx) => createImg('logo',idx,mov))}
         </div>

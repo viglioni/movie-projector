@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useCallback} from 'react';
 import {FontAwesomeIcon as FA} from "@fortawesome/react-fontawesome";
 import Projector from './projector';
 
@@ -7,6 +7,7 @@ const Player = ({ pause_between_anims, movies }) => {
      * STATES
      */
     const [movie_id, setMovieId] = useState(0);
+   // const prev_movie_id = usePrevious(movie_id);
     const [repeat, setRepeat] = useState(true);
     const [type, setType] = useState('projector'); // projector, anim_slider, slider
     const [paused, setPaused] = useState(false);
@@ -16,6 +17,13 @@ const Player = ({ pause_between_anims, movies }) => {
      */
     const number_of_movies = movies.length;
     const movie = movies[movie_id];
+
+    /*
+     * METHODS
+     */
+    const nextMovie = useCallback(() => {
+        setMovieId( (movie_id+1)%movies.length );
+    }, [movies, movie_id]);
     
     /*
      * EFFECTS
@@ -30,7 +38,7 @@ const Player = ({ pause_between_anims, movies }) => {
                     ,true))
             state = 'slider';
         setType(state);
-  }, [pause_between_anims, movies]);
+    }, [pause_between_anims, movies, type]);
 
     /*
      * BUTTONS
@@ -61,7 +69,7 @@ const Player = ({ pause_between_anims, movies }) => {
         <button
           style={ type === "projector" ? {} : {visibility: 'hidden'} }
           className="secondary"
-         // onClick={this.toggleRepeat}
+          onClick={() => setRepeat( !repeat )}
           title="Repetir animação"
           //aria-pressed={this.state.repeat}
         >
@@ -100,7 +108,7 @@ const Player = ({ pause_between_anims, movies }) => {
  const next = number_of_movies > 1
               ? (<button
                    className="right"
-                   //onClick={this.nextMovie}
+                   onClick={nextMovie}
                    title="Avançar animação"
                    disabled={
                        (number_of_movies=== movie_id + 1)
@@ -130,6 +138,10 @@ const Player = ({ pause_between_anims, movies }) => {
             <Projector
               movies={movies}
               paused={paused}
+              movie_id={movie_id}
+ //             prev_movie_id={prev_movie_id}
+              setMovieId={setMovieId}
+              type={type}
             />
           </div>
           <div className='controller'>
